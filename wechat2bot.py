@@ -10,6 +10,45 @@ from itchat.content import *
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
 
 
+# 自动回复图片等类别的群聊消息
+# isGroupChat=True表示为群聊消息          
+@itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING, PICTURE, RECORDING, ATTACHMENT, VIDEO], isGroupChat=True)
+def group_reply_media(msg):
+	# 消息来自于哪个群聊
+	chatroom_id = msg['User']['NickName']
+	# 发送者的昵称
+	username = msg['ActualNickName']
+	if chatroom_id not in chatroom_ids:
+		# print(u'%s is not under surveillance' % chatroom_id)
+		return
+	
+	chatroom_this = itchat.search_chatrooms(name=chatroom_id)
+	if chatroom_this:
+		chatroom_this = chatroom_this[0]
+	else:
+		print('No friend name %s' % chatroom_id)
+	# 根据消息类型转发
+	if msg['Type'] == TEXT or msg['Type'] == NOTE:
+		adminG.send(u'<G:%s>\n%s:\n%s\n<<'%(chatroom_id, username, msg['Text']))
+		return
+	elif msg['Type'] == CARD:
+		adminG.send_raw_msg(msg.msgType, msg.content)
+		adminG.send(u'<G:%s>\n%s\n<<'%(chatroom_id, username))
+		return
+	elif msg['Type'] == SHARING or msg['Type'] == MAP:
+		adminG.send(u'<G:%s>\n%s:\n%s\n%s\n<<'%(chatroom_id, username, msg['Text'], msg['Url']))
+		return
+	elif msg['Type'] == PICTURE or msg['Type'] == RECORDING or msg['Type'] == ATTACHMENT or msg['Type'] == VIDEO:
+		# 下载图片等文件
+		msg['Text'](msg['FileName'])
+		# 转发
+		adminG.send('@%s@%s' % ({'Picture': 'img', 'Video': 'vid'}.get(msg['Type'], 'fil'), msg['FileName']))
+		adminG.send(u'<G:%s>\n%s<<'%(chatroom_id, username))
+		return
+	adminG.send_raw_msg(msg.msgType, msg.content)
+	adminG.send(u'<G:%s>\n%s<<'%(chatroom_id, username))
+	return
+
 
 
 @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING, PICTURE, RECORDING, ATTACHMENT, VIDEO, FRIENDS], isGroupChat=False)
