@@ -10,6 +10,7 @@ from itchat.content import *
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer,encoding='utf8')
 
 
+
 # 自动回复图片等类别的群聊消息
 # isGroupChat=True表示为群聊消息          
 @itchat.msg_register([TEXT, MAP, CARD, NOTE, SHARING, PICTURE, RECORDING, ATTACHMENT, VIDEO], isGroupChat=True)
@@ -82,7 +83,6 @@ def general_reply(msg):
 
 
 
-
 itchat.auto_login(enableCmdQR=2,hotReload=True)    # 部分linux系统，块字符的宽度为一个字符（正常应为两字符），故赋值为2
 
 # 消息转发给指定用户
@@ -94,12 +94,14 @@ else:
     print('No friend name %s' % nameAdmin) 
 
 
+
 nameAdminGroup = u'江枫'
 adminG = itchat.search_friends(name=nameAdminGroup) # RemarkName
 if adminG:
     adminG = adminG[0]
 else:
     print('No friend named %s' % nameAdminGroup) 
+
 
 
 # chatrooms
